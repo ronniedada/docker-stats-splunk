@@ -1,17 +1,41 @@
 <dashboard>
   <label>Docker</label>
+  <fieldset>
+    <input type="dropdown" token="agg" searchWhenChanged="true">
+        <label>Agg Mode</label>
+        <default>max</default>
+        <choice value="min">min</choice>
+        <choice value="avg">avg</choice>
+        <choice value="perc90">perc90</choice>
+        <choice value="perc95">perc95</choice>
+        <choice value="perc99">perc99</choice>
+        <choice value="max">max</choice>
+    </input>
+    <input type="dropdown" token="tr" searchWhenChanged="true">
+        <label>Time Range</label>
+        <default>1h</default>
+        <choice value="-15m@m">15m</choice>
+        <choice value="-30m@m">30m</choice>
+        <choice value="-1h@h">1h</choice>
+        <choice value="-4h@h">4h</choice>
+        <choice value="-12h@h">12h</choice>
+        <choice value="-24h@h">24h</choice>
+        <choice value="-3d@d">3d</choice>
+        <choice value="-7d@d">7d</choice>
+    </input>
+  </fieldset>
   <row>
     <panel>
       <chart>
-        <title>CPU Usage - Last 4 hours - Max in time</title>
+        <title>CPU Usage - Last $tr$ - $agg$ in time</title>
         <search>
             <query>
                 source=docker_stats |
                 eval cpu_percent_n=tonumber(rtrim(cpu_percent,"%")) |
                 stats sum(cpu_percent_n) as cpu_percent_n by _time |
-                timechart max(cpu_percent_n)
+                timechart $agg$(cpu_percent_n)
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -43,7 +67,7 @@
     </panel>
     <panel>
       <chart>
-        <title>Memory Usage (Gb) - Last 4 hours - Max in time</title>
+        <title>Memory Usage (Gb) - Last $tr$ - $agg$ in time</title>
         <search>
             <query>
                 source=docker_stats |
@@ -61,10 +85,10 @@
                     mvindex(mem_limit_a,1)=="MB",tonumber(mvindex(mem_limit_a,0))/1024,
                     mvindex(mem_limit_a,1)=="GB",tonumber(mvindex(mem_limit_a,0))
                 ) |
-                stats sum(mem_usage_gb) as mem_usage_gb, sum(mem_limit_gb) as mem_limit_gb by _time |
-                timechart max(mem_usage_gb), max(mem_limit_gb)
+                stats sum(mem_usage_gb) as mem_usage_gb, mode(mem_limit_gb) as mem_limit_gb by _time |
+                timechart $agg$(mem_usage_gb), mode(mem_limit_gb)
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -96,7 +120,7 @@
   <row>
     <panel>
       <chart>
-        <title>CPU Usage Last 4 hours - Max by container</title>
+        <title>CPU Usage Last $tr$ - $agg$ by container</title>
         <search>
             <query>
                 source=docker_stats |
@@ -107,9 +131,9 @@
                     table container_id, container_name |
                     dedup container_id, container_name
                 ] |
-                timechart limit=20 max(cpu_percent) by container_name
+                timechart limit=20 $agg$(cpu_percent) by container_name
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -142,7 +166,7 @@
     </panel>
     <panel>
       <chart>
-        <title>Memory Usage (100%) Last 4 hours - Max by container</title>
+        <title>Memory Usage (100%) Last $tr$ - $agg$ by container</title>
         <search>
             <query>
                 source=docker_stats |
@@ -153,9 +177,9 @@
                     table container_id, container_name |
                     dedup container_id, container_name
                 ] |
-                timechart limit=20 max(mem_percent) by container_name
+                timechart limit=20 $agg$(mem_percent) by container_name
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -187,7 +211,7 @@
   <row>
     <panel>
       <chart>
-        <title>Network Input (Kb) Last 4 hours</title>
+        <title>Network Input (Kb) Last $tr$</title>
         <search>
             <query>
                 source=docker_stats |
@@ -211,7 +235,7 @@
                 eval delta=if(delta&lt;0,0,delta) |
                 timechart limit=20 avg(delta) by container_name
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -239,7 +263,7 @@
     </panel>
     <panel>
       <chart>
-        <title>Network Output (Kb) Last 4 hours</title>
+        <title>Network Output (Kb) Last $tr$</title>
         <search>
             <query>
                 source=docker_stats |
@@ -263,7 +287,7 @@
                 eval delta=if(delta&lt;0,0,delta) |
                 timechart limit=20 avg(delta) by container_name
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -293,7 +317,7 @@
   <row>
     <panel>
       <chart>
-        <title>Block Input (Kb) Last 4 hours</title>
+        <title>Block Input (Kb) Last $tr$</title>
         <search>
             <query>
                 source=docker_stats |
@@ -317,7 +341,7 @@
                 eval delta=if(delta&lt;0,0,delta) |
                 timechart limit=20 avg(delta) by container_name
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -345,7 +369,7 @@
     </panel>
     <panel>
       <chart>
-        <title>Block Output (Kb) Last 4 hours</title>
+        <title>Block Output (Kb) Last $tr$</title>
         <search>
             <query>
                 source=docker_stats |
@@ -369,7 +393,7 @@
                 eval delta=if(delta&lt;0,0,delta) |
                 timechart limit=20 avg(delta) by container_name
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
@@ -415,7 +439,7 @@
                 ] |
                 table _time, container_name, event
             </query>
-          <earliest>-4h@m</earliest>
+          <earliest>$tr$</earliest>
           <latest>now</latest>
         </search>
         <option name="wrap">true</option>
