@@ -1,6 +1,22 @@
 <dashboard>
   <label>Splunk</label>
   <fieldset>
+      <input type="dropdown" token="index" searchWhenChanged="true">
+        <label>Index</label>
+        <default>main</default>
+        <choice value="main">main</choice>
+        <choice value="50c">50c</choice>
+    </input>
+    <input type="dropdown" token="agg" searchWhenChanged="true">
+        <label>Agg Mode</label>
+        <default>avg</default>
+        <choice value="min">min</choice>
+        <choice value="avg">avg</choice>
+        <choice value="perc90">perc90</choice>
+        <choice value="perc95">perc95</choice>
+        <choice value="perc99">perc99</choice>
+        <choice value="max">max</choice>
+    </input>
     <input type="dropdown" token="tr" searchWhenChanged="true">
         <label>Time Range</label>
         <default>1h</default>
@@ -19,7 +35,7 @@
       <title>Total Indexing Thruput GB/day</title>
       <chart>
         <search>
-          <query>index=main  source=*metrics.log group="per_index_thruput" series=main | eval gb=kb/1024/1024 | timechart minspan=30s per_day(gb)</query>
+          <query>index=$index$  source=*metrics.log group="per_index_thruput" series=main | eval gb=kb/1024/1024 | timechart minspan=30s per_day(gb)</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -52,10 +68,10 @@
   </row>
     <row>
     <panel>
-      <title>Avg Search Times - Dense</title>
+      <title>$agg$ Search Times - Dense</title>
       <chart>
         <search>
-          <query>index=main source=*searcher.log keyword=every10 | timechart avg(dur)</query>
+          <query>index=$index$ source=*searcher.log keyword=every10 | timechart $agg$(dur)</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -86,80 +102,10 @@
       </chart>
     </panel>
     <panel>
-      <title>Avg Result Count - Dense</title>
+      <title>$agg$ Result Count - Dense</title>
       <chart>
         <search>
-          <query>index=main source=*searcher.log keyword=every10 | timechart avg(count)</query>
-          <earliest>$tr$</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
-        </search>
-        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
-        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisX.scale">linear</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">0</option>
-        <option name="charting.axisY2.scale">inherit</option>
-        <option name="charting.chart">line</option>
-        <option name="charting.chart.bubbleMaximumSize">50</option>
-        <option name="charting.chart.bubbleMinimumSize">10</option>
-        <option name="charting.chart.bubbleSizeBy">area</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
-        <option name="charting.chart.showDataLabels">none</option>
-        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-        <option name="charting.chart.stackMode">default</option>
-        <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
-        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-        <option name="charting.legend.placement">right</option>
-      </chart>
-    </panel>
-  </row>
-    <row>
-    <panel>
-      <title>Avg Search Times - Sparse</title>
-      <chart>
-        <search>
-          <query>index=main source=*searcher.log keyword=every1K | timechart avg(dur)</query>
-          <earliest>$tr$</earliest>
-          <latest>now</latest>
-          <sampleRatio>1</sampleRatio>
-        </search>
-        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
-        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
-        <option name="charting.axisTitleX.visibility">visible</option>
-        <option name="charting.axisTitleY.visibility">visible</option>
-        <option name="charting.axisTitleY2.visibility">visible</option>
-        <option name="charting.axisX.scale">linear</option>
-        <option name="charting.axisY.scale">linear</option>
-        <option name="charting.axisY2.enabled">0</option>
-        <option name="charting.axisY2.scale">inherit</option>
-        <option name="charting.chart">line</option>
-        <option name="charting.chart.bubbleMaximumSize">50</option>
-        <option name="charting.chart.bubbleMinimumSize">10</option>
-        <option name="charting.chart.bubbleSizeBy">area</option>
-        <option name="charting.chart.nullValueMode">gaps</option>
-        <option name="charting.chart.showDataLabels">none</option>
-        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
-        <option name="charting.chart.stackMode">default</option>
-        <option name="charting.chart.style">shiny</option>
-        <option name="charting.drilldown">all</option>
-        <option name="charting.layout.splitSeries">0</option>
-        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
-        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
-        <option name="charting.legend.placement">right</option>
-      </chart>
-    </panel>
-    <panel>
-      <title>Avg Result Count - Sparse</title>
-      <chart>
-        <search>
-          <query>index=main source=*searcher.log keyword=every1K | timechart avg(count)</query>
+          <query>index=$index$ source=*searcher.log keyword=every10 | timechart $agg$(count)</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -192,10 +138,10 @@
   </row>
     <row>
     <panel>
-      <title>Avg Search Times - Rare</title>
+      <title>$agg$ Search Times - Sparse</title>
       <chart>
         <search>
-          <query>index=main source=*searcher.log keyword=every100K | timechart avg(dur)</query>
+          <query>index=$index$ source=*searcher.log keyword=every1K | timechart $agg$(dur)</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -226,10 +172,80 @@
       </chart>
     </panel>
     <panel>
-      <title>Avg Result Count - Rare</title>
+      <title>$agg$ Result Count - Sparse</title>
       <chart>
         <search>
-          <query>index=main source=*searcher.log keyword=every100K | timechart avg(count)</query>
+          <query>index=$index$ source=*searcher.log keyword=every1K | timechart $agg$(count)</query>
+          <earliest>$tr$</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+  </row>
+    <row>
+    <panel>
+      <title>$agg$ Search Times - Rare</title>
+      <chart>
+        <search>
+          <query>index=$index$ source=*searcher.log keyword=every100K | timechart $agg$(dur)</query>
+          <earliest>$tr$</earliest>
+          <latest>now</latest>
+          <sampleRatio>1</sampleRatio>
+        </search>
+        <option name="charting.axisLabelsX.majorLabelStyle.overflowMode">ellipsisNone</option>
+        <option name="charting.axisLabelsX.majorLabelStyle.rotation">0</option>
+        <option name="charting.axisTitleX.visibility">visible</option>
+        <option name="charting.axisTitleY.visibility">visible</option>
+        <option name="charting.axisTitleY2.visibility">visible</option>
+        <option name="charting.axisX.scale">linear</option>
+        <option name="charting.axisY.scale">linear</option>
+        <option name="charting.axisY2.enabled">0</option>
+        <option name="charting.axisY2.scale">inherit</option>
+        <option name="charting.chart">line</option>
+        <option name="charting.chart.bubbleMaximumSize">50</option>
+        <option name="charting.chart.bubbleMinimumSize">10</option>
+        <option name="charting.chart.bubbleSizeBy">area</option>
+        <option name="charting.chart.nullValueMode">gaps</option>
+        <option name="charting.chart.showDataLabels">none</option>
+        <option name="charting.chart.sliceCollapsingThreshold">0.01</option>
+        <option name="charting.chart.stackMode">default</option>
+        <option name="charting.chart.style">shiny</option>
+        <option name="charting.drilldown">all</option>
+        <option name="charting.layout.splitSeries">0</option>
+        <option name="charting.layout.splitSeries.allowIndependentYRanges">0</option>
+        <option name="charting.legend.labelStyle.overflowMode">ellipsisMiddle</option>
+        <option name="charting.legend.placement">right</option>
+      </chart>
+    </panel>
+    <panel>
+      <title>$agg$ Result Count - Rare</title>
+      <chart>
+        <search>
+          <query>index=$index$ source=*searcher.log keyword=every100K | timechart $agg$(count)</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -265,7 +281,7 @@
       <title>Avg Queue %Util - max among containers </title>
       <chart>
         <search>
-          <query>index=main  source=*metrics.log group=queue | eval perc_usage = (current_size_kb / max_size_kb) * 100 | where perc_usage &gt;= 0 | timechart partial=f limit=100 max(perc_usage) by name</query>
+          <query>index=$index$  source=*metrics.log group=queue | eval perc_usage = (current_size_kb / max_size_kb) * 100 | where perc_usage &gt;= 0 | timechart partial=f limit=100 max(perc_usage) by name</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -299,7 +315,7 @@
       <title>Load Average</title>
       <chart>
         <search>
-          <query>index=main  source=*metrics.log group="thruput" | timechart avg(load_average) by source</query>
+          <query>index=$index$  source=*metrics.log group="thruput" | timechart avg(load_average) by source</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -335,7 +351,7 @@
       <title>Per Tenant Indexing Thruput KB/s</title>
       <chart>
         <search>
-          <query>index=main  source=*metrics.log group="per_index_thruput" series=main | timechart minspan=30s avg(kbps) by source useother=f</query>
+          <query>index=$index$  source=*metrics.log group="per_index_thruput" series=main | timechart minspan=30s avg(kbps) by source useother=f</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
@@ -369,7 +385,7 @@
       <title>Per Tenant Indexing Thruput GB/day</title>
       <chart>
         <search>
-          <query>index=main  source=*metrics.log group="per_index_thruput" series=main | eval gb=kb/1024/1024 | timechart minspan=30s per_day(gb) by source useother=f</query>
+          <query>index=$index$  source=*metrics.log group="per_index_thruput" series=main | eval gb=kb/1024/1024 | timechart minspan=30s per_day(gb) by source useother=f</query>
           <earliest>$tr$</earliest>
           <latest>now</latest>
           <sampleRatio>1</sampleRatio>
